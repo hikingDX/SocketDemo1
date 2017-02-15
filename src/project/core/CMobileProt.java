@@ -1,12 +1,9 @@
 package project.core;
 
-import project.utils.Global_Define;
-import project.utils.MyByteBuffer;
+import project.utils.*;
 import project.beans.MC_FrameHead;
 import project.beans.MHC_SORT_RESPONE;
 import project.beans.tagLocalStockData;
-import project.utils.STD;
-import project.utils.ViewTools;
 
 import java.util.ArrayList;
 
@@ -135,7 +132,66 @@ public class CMobileProt {
                 (byte) PageNo, SessionID, RequestCode, data, offset, datasize,
                 (byte) encrypt);
     }
+    public static int MakeEncryptPackage(byte MainType, byte ChildType,
+                                         byte PageNo, int SessionID, int RequestCode, byte[] data,
+                                         int offset, int datasize, byte encrypt) {
+//		L.i(TAG, "send_2 -- MainType: " + MainType + " ChildType: "
+//				+ ChildType);
+        // 加密
+        if (encrypt != 0) {
+            int t_offset = offset + MC_FrameHead.MC_FrameHead_LEN;
+            int size = datasize - MC_FrameHead.MC_FrameHead_LEN;
+            size = CDataEncrypt.Encrypt(data, t_offset, size, data, t_offset,
+                    data.length - t_offset, CDataEncrypt.HQ_DEFAULT_KEY);
+            datasize = size + MC_FrameHead.MC_FrameHead_LEN;
+            encrypt = 1;
+        }
+        if (data.length - offset < datasize) {
+            return -1;
+        }
 
+		/*
+         * unsigned char Market; //协议标识，目前定义为'#'，表示手机协议2.0 unsigned char zip:3;
+		 * //0表示不压缩，为1时表示使用LZW8192压缩了 unsigned char crypt:3; //表示数据加密了 unsigned
+		 * char ErrorFlag:1;
+		 * //为1表示错误，错误号为ErrorCode，0表示成功，PackageNum和PackageNo分别表示总应
+		 * //答包及应答包序号，当PackageNo+1==PackageNum时表示没有后续包 unsigned char unused:1;
+		 * //未使用 union { unsigned short ErrorCode; struct { unsigned char
+		 * PackageNum; unsigned char PackageNo; }; };
+		 *
+		 * unsigned short CheckCode; //校验码（对通讯包体进行CRC16校验，在加密压缩前） unsigned short
+		 * PackageSize; //包体的长度，加密压缩后
+		 *
+		 * DWORD SessionID:24; //用于会话ID DWORD PageID:8; //页面ID,
+		 * 由客户端定义，服务器原样返回，客户端用于区分不同页面
+		 *
+		 * unsigned char MainType; unsigned char ChildType; unsigned short
+		 * RequestCode:14; //区分不同请求 unsigned short DataFlag:2;
+		 * //0表示是请求包，RequestCode指定请求号 //1表示是应答包，RequestCode同请求时
+		 * //2表示是推送包，RequestCode无意义
+		 */
+        data[offset] = '#'; // Market
+        data[offset + 1] = (byte) (0 + (encrypt << 3)); // 不压缩，不加密，成功,
+        // zip,crypt,ErrorFlag,unused
+        data[offset + 2] = 1; // PackageNum
+        data[offset + 3] = 0; // PackageNo
+        short PackageSize = (short) (datasize - MC_FrameHead.MC_FrameHead_LEN);
+        short checkcode = CRC16(data, offset
+                + MC_FrameHead.MC_FrameHead_LEN, PackageSize);
+        MyByteBuffer.putShort(data, offset + 4, checkcode);
+        MyByteBuffer.putShort(data, offset + 6, PackageSize);
+
+        int temp = (SessionID & 0x00ffffff)
+                + (((int) PageNo << 24) & 0xff000000);
+        MyByteBuffer.putInt(data, offset + 8, temp);
+        data[offset + 12] = MainType;
+        data[offset + 13] = ChildType;
+
+        short value = (short) ((RequestCode & 0x3fff) + (0 << 14)); // RequestCode,DataFlag
+        MyByteBuffer.putShort(data, offset + 14, value);
+
+        return datasize;
+    }
     /**
      * 行情字段解析
      *
