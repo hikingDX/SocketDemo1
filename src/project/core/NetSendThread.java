@@ -26,7 +26,7 @@ public class NetSendThread extends Thread {
     ByteBuffer mSendByteBuffer;
     private byte[] mSendData;
     private int mSendSize;
-    private Message mMsg;
+    //    private Message mMsg;
     //private Date				mDate;
     private long mLastNetDataTime;    //最后处理网络数据的时间
     private long mLastSessionTime;    //会话最后时间，即客户最后操作时间。
@@ -58,11 +58,13 @@ public class NetSendThread extends Thread {
 
     synchronized public void closeNetThread() {
         System.out.println("NetSendThread--->closeNetThread 1");
-        if (mGlobalNetClass == mMyApp.mCertifyNet || mGlobalNetClass == mMyApp.mNetClass)
-            mMyApp.mLoginFlag = false;
+        /**
+         if (mGlobalNetClass == mMyApp.mCertifyNet || mGlobalNetClass == mMyApp.mNetClass)
+         mMyApp.mLoginFlag = false;
+         */
         mRun = false;
-        mSessionID = 0;
-        mRequestCode = 0;
+        mGlobalNetClass.mSessionID = 0;
+        mGlobalNetClass.mRequestCode = 0;
 
         if (mSocketChannel == null)
             return;
@@ -90,9 +92,9 @@ public class NetSendThread extends Thread {
 
 
     public int addSendDataWithHeartFlag(byte[] data, int offset, int size, boolean flag) {
-        if (!mMyApp.isSchedule) {// 防止重复踢人
-            return 0;
-        }
+//        if (!mMyApp.isSchedule) {// 防止重复踢人
+//            return 0;
+//        }
         synchronized (this) {
             if (size + mSendSize > mSendData.length)    //缓冲不够
             {
@@ -143,9 +145,9 @@ public class NetSendThread extends Thread {
                     net.clear();
                     net = null;
                     if (!ret || info.socket == null) {
-                        System.out.println( "Connect Failed!");
+                        System.out.println("Connect Failed!");
                         errMsg = "网络连接失败！";
-                        System.out.println( errMsg);
+                        System.out.println(errMsg);
                         errFlag = 1;
                         mGlobalNetClass.resetConnectAddr();
                         break;
@@ -153,23 +155,25 @@ public class NetSendThread extends Thread {
                     System.out.println("Connect success addr:: " + mGlobalNetClass.mAddrConnect[info.index]);
                     mGlobalNetClass.deleteAddrWithIndex(info.index);
                     mSocketChannel = info.socket;
-                    System.out.println("mMyApp.mLoginFlag = " + mMyApp.mLoginFlag);
-                    if (mMyApp.mLoginFlag == false
-                            && mGlobalNetClass == mMyApp.mNetClass) {
-                        if (!bReq_144_7) {
-                            System.out.println("HQ--->reConnect Success!");
-                            byte buffer[] = new byte[4096];
-                            int size = globalNetProcess.getLoginData_FromCertify(buffer,
-                                    0, mMyApp.mLoginData, mMyApp.mUser,
-                                    mMyApp.mPassWord,
-                                    mMyApp.mMobilePassport, "phone=" + mMyApp.getPhoneNum(),
-                                    0, "0");
-                            addSendData(buffer, 0, size);
-                        } else {
-                            System.out.println( "HQ--->reConnect Failed!");
-                            bReq_144_7 = false;
-                        }
-                    }
+                    /**
+                     System.out.println("mMyApp.mLoginFlag = " + mMyApp.mLoginFlag);
+                     if (mMyApp.mLoginFlag == false
+                     && mGlobalNetClass == mMyApp.mNetClass) {
+                     if (!bReq_144_7) {
+                     System.out.println("HQ--->reConnect Success!");
+                     byte buffer[] = new byte[4096];
+                     int size = globalNetProcess.getLoginData_FromCertify(buffer,
+                     0, mMyApp.mLoginData, mMyApp.mUser,
+                     mMyApp.mPassWord,
+                     mMyApp.mMobilePassport, "phone=" + mMyApp.getPhoneNum(),
+                     0, "0");
+                     addSendData(buffer, 0, size);
+                     } else {
+                     System.out.println( "HQ--->reConnect Failed!");
+                     bReq_144_7 = false;
+                     }
+                     }
+                     */
                 } else {
                     System.out.println("run--->IsConnected() = " + mGlobalNetClass.isConnected());
                 }
@@ -224,7 +228,7 @@ public class NetSendThread extends Thread {
                 }
                 synchronized (this) {
                     if (size < 0) {
-                        System.out.println( "readsize:" + size);
+                        System.out.println("readsize:" + size);
                         break;
                     } else if (size > 0) {
                         mLastRequestTime = -1;
@@ -232,7 +236,7 @@ public class NetSendThread extends Thread {
                         System.out.println("1.readsize:" + size);
                         if (size + mReadSize > mReadData.length)    //数据有误
                         {
-                            System.out.println( "数据有误...");
+                            System.out.println("数据有误...");
                             errFlag = 1;
                             break;
                         }
@@ -241,7 +245,9 @@ public class NetSendThread extends Thread {
 
                         boolean quitflag = false;
                         while (mRun) {
-                            isUpdate = false;
+                            /**
+                             isUpdate = false;
+                             */
                             size = mGlobalNetClass.decode(mReadData, mReadSize);
                             System.out.println("3.decode size:" + mReadSize + "  ret:" + size);
                             if (size < 0)    //解析数据错误，需关闭会话
@@ -252,18 +258,20 @@ public class NetSendThread extends Thread {
                                 quitflag = true;
                                 break;
                             } else if (size > 0) {
-                                //发送更新消息
-                                if (isUpdate && mMainHandle != null) {
-                                    mMsg = mMainHandle.obtainMessage(
-                                            mMsgId, mChildType, mArg2,
-                                            mMsgObject);
-                                    mMainHandle.sendMessage(mMsg);
-                                    System.out.println( "发送客户端更新包 mMainType =" + mMainType + " mChildType = " + mChildType + " Size : " + mMyApp.getStockDataList().size()
-                                            + " pageid = " + mPageId
-                                            + " requestCode = " + mRequestCode);
-                                } else if (mMainHandle == null) {
-//		            						L.e("qlmobile", "2 mMainHandle == null");
-                                }
+                                /**
+                                 //发送更新消息
+                                 if (isUpdate && mMainHandle != null) {
+                                 mMsg = mMainHandle.obtainMessage(
+                                 mMsgId, mChildType, mArg2,
+                                 mMsgObject);
+                                 mMainHandle.sendMessage(mMsg);
+                                 System.out.println("发送客户端更新包 mMainType =" + mMainType + " mChildType = " + mChildType + " Size : " + mMyApp.getStockDataList().size()
+                                 + " pageid = " + mPageId
+                                 + " requestCode = " + mRequestCode);
+                                 } else if (mMainHandle == null) {
+                                 //		            						L.e("qlmobile", "2 mMainHandle == null");
+                                 }
+                                 */
                                 int left = mReadSize - size;
                                 if (left > 0) {
                                     System.arraycopy(mReadData, size,
@@ -283,7 +291,7 @@ public class NetSendThread extends Thread {
                     }
                 }
             } else
-                System.out.println( "mSocketChannel == null");
+                System.out.println("mSocketChannel == null");
 
             long now = System.currentTimeMillis();
             if (now - mLastNetDataTime >= HEART_TIMER)    //一段时间没有网络数据，需要发心跳包了
@@ -307,15 +315,18 @@ public class NetSendThread extends Thread {
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
-                    System.out.println( "Thread InterruptedException...");
+                    System.out.println("Thread InterruptedException...");
                 }
             }
         }
         closeNetThread();
-        if (mMainHandle != null && errMsg.length() > 0) {//
-            Message mMsg = mMainHandle.obtainMessage(MSG_CONNECT_ERROR, errFlag, 0, errMsg);
-            mMainHandle.sendMessage(mMsg);
-        }
+        /**
+         if (mMainHandle != null && errMsg.length() > 0) {//
+         Message mMsg = mMainHandle.obtainMessage(MSG_CONNECT_ERROR, errFlag, 0, errMsg);
+         mMainHandle.sendMessage(mMsg);
+         }
+         */
+
         System.out.println("NetSendThread end");
     }
 }

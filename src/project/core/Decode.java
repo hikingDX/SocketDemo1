@@ -106,10 +106,10 @@ public class Decode {
         /**
          * 5.解析协议
          */
-        decodeDataByProtocol(head,expanddata,datasize);
+        return decodeDataByProtocol(head,expanddata,datasize,packagesize);
     }
 
-    private void decodeDataByProtocol(MC_FrameHead head, byte[] expanddata, int datasize) {
+    private int decodeDataByProtocol(MC_FrameHead head, byte[] expanddata, int datasize,int packagesize) {
         mMsgObject = "";
         mArg2 = 0;
 
