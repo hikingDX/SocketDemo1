@@ -7,7 +7,8 @@ import project.beans.MC_FrameHead;
  */
 public class global_net_class {
     public int mSessionID;        //会话ID
-
+    public int mRequestCode;    //请求号
+    public int mPageId;        //功能页面ID
 
     public String mAddrConnect[];        //当前正在连的地址列表
     public int mAddrConnectNum;
@@ -18,7 +19,7 @@ public class global_net_class {
 
     public Decode mDecode;
 
-    public global_net_class(int mSessionID) {
+    public global_net_class() {
         //数据包解析类
         mDecode = new Decode(this);
     }
@@ -26,6 +27,7 @@ public class global_net_class {
 
     /**
      * 解析数据包
+     *
      * @param data
      * @param size
      * @return
@@ -36,6 +38,7 @@ public class global_net_class {
 
     /**
      * 开启连接
+     *
      * @param data
      * @param offset
      * @param size
@@ -71,9 +74,10 @@ public class global_net_class {
             mSendThread.closeNetThread();
             mSendThread = null;
         }
-        //
-        if (global_net_class.this == mMyApp.mCertifyNet || global_net_class.this == mMyApp.mNetClass)
-            mMyApp.mLoginFlag = false;
+        /**
+         if (global_net_class.this == mMyApp.mCertifyNet || global_net_class.this == mMyApp.mNetClass)
+         mMyApp.mLoginFlag = false;
+         */
     }
 
     /**
@@ -95,6 +99,7 @@ public class global_net_class {
         }
         mAddrConnectNum--;
     }
+
     //发送心跳包
     public int SendHeartRequest() {
         byte[] data = new byte[MC_FrameHead.MAX_MOBILE_PACKAGE_SIZE];

@@ -33,7 +33,7 @@ public class Decode {
     public static final int MSG_ZY_EVENTBUS_PUSH_DATA_ZS = 114;//自营版指数推送
 
     global_net_class global_net_class;
-    int mSessionID;
+
     //解压类
     private MLZW8192 mLZW8192;
     //协议
@@ -45,10 +45,10 @@ public class Decode {
 
     public Decode(project.core.global_net_class global_net_class) {
         this.global_net_class = global_net_class;
-        mSessionID = global_net_class.mSessionID;
         //创建解压数据包类
         mLZW8192 = new MLZW8192();
     }
+
     /**
      * 解析协议数据
      *
@@ -94,8 +94,8 @@ public class Decode {
         /**
          * 4.解析错误
          */
-        tmp = decodeError(head,expanddata,packagesize);
-        if (tmp>0){
+        tmp = decodeError(head, expanddata, packagesize);
+        if (tmp > 0) {
             return tmp;
         }
 
@@ -122,34 +122,34 @@ public class Decode {
             /**
              * 心跳包
              */
-            case 0:{
+            case 0: {
                 isUpdate = false;
                 break;
             }
             /**
              * 价格提醒
              */
-            case 150:{
-                switch (head.ChildType){
-                    case 0:{
+            case 150: {
+                switch (head.ChildType) {
+                    case 0: {
 
                     }
-                    case 1:{
+                    case 1: {
 
                     }
-                    case 2:{
+                    case 2: {
 
                     }
                 }
             }
-            case 144:{
-                switch (head.ChildType){
+            case 144: {
+                switch (head.ChildType) {
 
                 }
             }
 
-            case 145:{
-                switch (head.ChildType){
+            case 145: {
+                switch (head.ChildType) {
                     case 17:        //排行
                         if (head.PageID != mPageId) {
                             isUpdate = false;
@@ -179,12 +179,13 @@ public class Decode {
 
     /**
      * 解析错误
+     *
      * @param head
      * @param expanddata
      * @param packagesize
      * @return
      */
-    private int decodeError(MC_FrameHead head,byte[] expanddata,int packagesize) {
+    private int decodeError(MC_FrameHead head, byte[] expanddata, int packagesize) {
         //返回错误
         if (head.ErrorFlag == 1) {
             System.out.println("[" + head.MainType + ", " + head.ChildType + "], head.ErrorFlag == 1!!!");
@@ -348,11 +349,10 @@ public class Decode {
         /**
          * 4.sessionID的判断 如果不是当前回话 结束返回
          */
-        if (mSessionID == 0) {
-            mSessionID = head.SessionID;
-
-        } else if (mSessionID != head.SessionID) {
-            System.out.println("SessionID Error!!! ----" + mSessionID + " ===== " + head.SessionID);
+        if (global_net_class.mSessionID == 0) {
+            global_net_class.mSessionID = head.SessionID;
+        } else if (global_net_class.mSessionID != head.SessionID) {
+            System.out.println("SessionID Error!!! ----" + global_net_class.mSessionID + " ===== " + head.SessionID);
             return -10;
         }
         return ret;

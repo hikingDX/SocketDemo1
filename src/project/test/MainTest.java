@@ -8,14 +8,16 @@ import project.core.global_net_class;
  */
 public class MainTest {
     public static void main(String[] args) {
-        global_net_class global_net_class = new global_net_class(1);
+        global_net_class globalnetclass = new global_net_class();
         int market = 3;
         int stocktype = 1;
         int sorttype = 1;
         int startpos = 0;
         int num = 20;
+        globalnetclass.mRequestCode = 4;
+        globalnetclass.mPageId = 17;
         //请求一个行情
-        globalNetProcess.RequestSortList(global_net_class, market, stocktype, sorttype, startpos, num);
+        globalNetProcess.RequestSortList(globalnetclass, market, stocktype, sorttype, startpos, num);
 
     }
 }
