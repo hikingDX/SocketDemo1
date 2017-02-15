@@ -1,10 +1,14 @@
 package project.core;
 
+import project.beans.MHC_SORT_RESPONE;
+import project.beans.tagLocalStockData;
 import project.utils.CDataEncrypt;
 import project.utils.Global_Define;
 import project.utils.MLZW8192;
 import project.beans.MC_FrameHead;
 import project.utils.STD;
+
+import java.util.ArrayList;
 
 import static project.beans.MC_FrameHead.MC_FrameHead_LEN;
 
@@ -102,10 +106,10 @@ public class Decode {
         /**
          * 5.解析协议
          */
-        decodeDataByProtocol(head);
+        decodeDataByProtocol(head,expanddata,datasize);
     }
 
-    private void decodeDataByProtocol(MC_FrameHead head) {
+    private void decodeDataByProtocol(MC_FrameHead head, byte[] expanddata, int datasize) {
         mMsgObject = "";
         mArg2 = 0;
 
@@ -117,7 +121,7 @@ public class Decode {
         mChildType = head.ChildType;
         mMainType = head.MainType;
         mArg2 = mMainType;
-        MDBF mdbf = null;
+//        MDBF mdbf = null;
         switch (head.MainType) {
             /**
              * 心跳包
@@ -151,18 +155,17 @@ public class Decode {
             case 145: {
                 switch (head.ChildType) {
                     case 17:        //排行
-                        if (head.PageID != mPageId) {
+                        if (head.PageID != global_net_class.mPageId) {
                             isUpdate = false;
-                            L.e("qlmobile", "decode--->" + head.ChildType
-                                    + ", pageId = " + mPageId + ", head.PageID = " + head.PageID);
+                            System.out.println("decode--->" + head.ChildType
+                                    + ", pageId = " + global_net_class.mPageId + ", head.PageID = " + head.PageID);
                             break;
                         }
-                        mMyApp.mSort_Response = CMobileProt.Analy_17(expanddata, datasize, mMyApp.getStockDataList());
+                        ArrayList<tagLocalStockData> mStockDataList = new ArrayList<>();    //存储股票列表
+                        MHC_SORT_RESPONE respone = CMobileProt.Analy_17(expanddata, datasize, mStockDataList);
+
                         //通过PageId区分是否为自营版请求数据
-                        if (EventBus.getDefault() != null && head.PageID == Global_Define.FUNC_ZY_STOCK_SORT) {
-                            EventBus.getDefault().post(new ResponseEvent(head.RequestCode, head.MainType, head.ChildType, head.PageID, mMsgId, mMyApp.getStockDataList()));
-                            L.d(TAG, "EventBus posddata 145.17--->head.RequestCode= " + head.RequestCode + ", head.PageID = " + head.PageID
-                                    + ", data.size = " + mMyApp.getStockDataList().size());
+                        if (head.PageID == Global_Define.FUNC_ZY_STOCK_SORT) {
                             isUpdate = false;
                             break;
                         } else {
@@ -205,9 +208,11 @@ public class Decode {
             }
 
             //认证失败，把用户名复位最后一次登录成功的那个用户名
-            if (head.MainType == 144 && (head.ChildType == 5 || head.ChildType == 6)) {
-                mMyApp.mUser = mMyApp.mUser_Last;
-            }
+            /**hj
+             if (head.MainType == 144 && (head.ChildType == 5 || head.ChildType == 6)) {
+             mMyApp.mUser = mMyApp.mUser_Last;
+             }
+             */
 
             //登录失败 关闭连接
             if (head.MainType == 144 && (head.ChildType == 0 || head.ChildType == 7)) {
@@ -229,15 +234,16 @@ public class Decode {
                 isUpdate = true;
             }
 
-            //自选股下载失败
-            if (head.MainType == 145 && head.ChildType == 52) {
+            /**hj
+             //自选股下载失败
+             if (head.MainType == 145 && head.ChildType == 52) {
 
-                System.out.println("MyStock Download Error... " + mMsgObject);
-                //启动定时下载
-                mMyApp.startDownloadTimer();
-                isUpdate = false;
-            }
-
+             System.out.println("MyStock Download Error... " + mMsgObject);
+             //启动定时下载
+             mMyApp.startDownloadTimer();
+             isUpdate = false;
+             }
+             */
             expanddata = null;
             return packagesize + MC_FrameHead_LEN;
         }
