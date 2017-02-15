@@ -164,6 +164,7 @@ public class Decode {
                         ArrayList<tagLocalStockData> mStockDataList = new ArrayList<>();    //存储股票列表
                         MHC_SORT_RESPONE respone = CMobileProt.Analy_17(expanddata, datasize, mStockDataList);
 
+                        System.out.println("Test——总数："+respone.nTotalNum+"-------hiking-------"+mStockDataList.get(1).name);
                         //通过PageId区分是否为自营版请求数据
                         if (head.PageID == Global_Define.FUNC_ZY_STOCK_SORT) {
                             isUpdate = false;

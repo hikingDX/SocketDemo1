@@ -162,6 +162,7 @@ public class NetConnect {
                 mAddr = STD.GetValue(mAddr, 1, '|');    //updateAddressWithName需要先解析|
                 String ip = STD.GetValue(mAddr, 1, ':');
                 int port = STD.GetValueInt(mAddr, 2, ':');
+                System.out.println("hiking++"+ip);
                 InetAddress inetAddr = InetAddress.getByName(ip);
                 SocketAddress address = new InetSocketAddress(inetAddr.getHostAddress(), port);
 

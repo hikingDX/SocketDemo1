@@ -9,6 +9,8 @@ import project.core.global_net_class;
 public class MainTest {
     public static void main(String[] args) {
         global_net_class globalnetclass = new global_net_class();
+        globalnetclass.mAddrConnect = new String[]{"221.204.230.104:20000"};
+        globalnetclass.mAddrConnectNum=1;
         int market = 3;
         int stocktype = 1;
         int sorttype = 1;
