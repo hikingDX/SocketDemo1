@@ -1,18 +1,10 @@
 package project.utils;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
-import android.util.DisplayMetrics;
+
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 
-import qianlong.qlmobile.data.Global_Define;
 
 public final class ViewTools {
 
@@ -24,207 +16,7 @@ public final class ViewTools {
     public final static int j[] = {0, 2500, 5000, 100000, 200000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 99950000};
     public final static int w[] = {0, 10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000};
 
-    //获取屏幕分辨率
-    public static DisplayMetrics getScreenSize(Context context) {
 
-        DisplayMetrics dm = new DisplayMetrics();
-
-        dm = context.getApplicationContext().getResources().getDisplayMetrics();
-
-        return dm;
-    }
-
-    //dip/px像素单位转换
-    public static int dip2px(Context context, float dipValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dipValue * scale + 0.5f);
-    }
-
-    public static int px2dip(Context context, float pxValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
-    }
-
-    //
-    public static int getFontHeight(float fontSize) {
-
-        Paint paint = new Paint();
-        paint.setTextSize(fontSize);
-        FontMetrics fm = paint.getFontMetrics();
-
-        return (int) (Math.ceil(fm.descent - fm.top) + 2);
-    }
-
-    //从文件读取图片
-    public static Bitmap getBitmapFromFile(Context context, String fileName) {
-
-        InputStream is = null;
-//		int resid = context.getResources().getIdentifier(fileName, "drawable", context.getPackageName());
-        try {
-            is = context.getResources().getAssets().open(fileName);
-        } catch (Exception e) {
-            L.e("qlmobile", "Icon File Not Found...");
-            return null;
-        }
-        Bitmap bm = BitmapFactory.decodeStream(is, null, null).extractAlpha();
-        return bm;
-    }
-
-    public static Bitmap getBitmapFromFile_NoAlpha(Context context, String fileName) {
-
-        InputStream is = null;
-        try {
-            is = context.getResources().getAssets().open(fileName);
-        } catch (Exception e) {
-            L.e("qlmobile", "Icon File Not Found...");
-            return null;
-        }
-        Bitmap bm = BitmapFactory.decodeStream(is, null, null);
-        return bm;
-    }
-
-    public static void DrawTextRect(Canvas canvas, String text, int left, int top, int right, int bottom, Paint paint, Paint.Align align, int color) {
-        paint.setColor(color);
-        paint.setTextAlign(align);
-        if (align == Paint.Align.LEFT) {
-            canvas.drawText(text, left, bottom, paint);
-        } else if (align == Paint.Align.RIGHT) {
-            canvas.drawText(text, right, bottom, paint);
-        } else if (align == Paint.Align.CENTER) {
-            canvas.drawText(text, (left + right) >> 1, (bottom + top) >> 1, paint);
-        }
-
-    }
-
-    //在指定位置，以指定的颜色、对齐方式显示一串文本，返回显示高度
-    public static void DrawText(Canvas canvas, String text, int left, int right, int top, int bottom, Paint paint) {
-        FontMetrics fm = paint.getFontMetrics();
-        int y = top + (int) (bottom - top - fm.ascent) / 2;
-        if (bottom <= top) {
-            int h = (int) (Math.ceil(fm.descent - fm.top) + 2);
-            y = top + (int) (h - fm.ascent) / 2;
-        }
-
-        Paint.Align align = paint.getTextAlign();
-        if (align == Paint.Align.LEFT) {
-            canvas.drawText(text, left, y, paint);
-        } else if (align == Paint.Align.RIGHT) {
-            canvas.drawText(text, right, y, paint);
-        } else if (align == Paint.Align.CENTER) {
-            canvas.drawText(text, (left + right) >> 1, y, paint);
-        }
-    }
-
-    public static void DrawText(Canvas canvas, String text, int left, int top, Paint paint, Paint.Align align, int color) {
-        paint.setColor(color);
-        paint.setTextAlign(align);
-        canvas.drawText(text, left, top, paint);
-    }
-
-    //在指定位置，以指定的对齐方式、指定小数位数，显示价格
-    //flag: true--使用paint设置
-    public static void DrawPrice(Canvas canvas, int x, int y, int price, int now, int yesterday, int dotlen, Paint paint, boolean flag) {
-        DrawPrice(canvas, x, y, price, now, yesterday, dotlen, paint, flag, 0);
-    }
-
-    //在指定位置，以指定的对齐方式、指定小数位数，显示价格
-    //flag: true--使用paint设置
-    public static void DrawPrice(Canvas canvas, int x, int y, int price, int now, int yesterday, int dotlen, Paint paint, boolean flag, int xsws) {
-        DrawPrice(canvas, x, y, 0, price, now, yesterday, dotlen, paint, flag, xsws);
-    }
-
-    public static void DrawPrice(Canvas canvas, int x, int top, int bottom, int price, int now, int yesterday, int dotlen, Paint paint, boolean flag, int xsws) {
-        String str = getStringByPrice(price, now, dotlen, xsws);
-        if (flag == false) {
-            paint.setColor(getColor(price, yesterday));
-            paint.setTextAlign(Paint.Align.LEFT);
-        }
-        DrawText(canvas, str, 0, x, top, bottom, paint);
-    }
-
-    //在指定位置，以黄色、右对齐方式、指定宽度，显示量，单位手
-    public static void DrawVolume(Canvas canvas, int x, int y, long volume, int market, int unit, Paint paint) {
-        DrawVolume(canvas, x, y, 0, volume, market, unit, paint);
-    }
-
-    public static void DrawVolume(Canvas canvas, int x, int top, int bottom, long volume, int market, int unit, Paint paint) {
-        String str = getStringByVolume(volume, market, unit, 6, false);
-        if (paint.getTextAlign() == Paint.Align.LEFT) {
-            DrawText(canvas, str, x, 0, top, bottom, paint);
-        } else {
-            paint.setTextAlign(Paint.Align.RIGHT);
-            if (volume == 0) {
-                paint.setColor(COLOR.DATA_NULL);
-            } else {
-                paint.setColor(COLOR.COLOR_VOL);
-            }
-            DrawText(canvas, str, 0, x, top, bottom, paint);
-        }
-    }
-
-
-    //在指定位置，以白色、右对齐方式、指定宽度，显示金额
-    public static void DrawAmount(Canvas canvas, int x, int y, long amount, int market, Paint paint) {
-        DrawAmount(canvas, x, y, 0, amount, market, paint);
-    }
-
-//	//在指定位置，以黄色、右对齐方式、指定宽度，显示量比
-//	public	static void	DrawLB(Canvas canvas, int x, int y, int lb, int width, Paint paint)
-//	{
-//		String str = String.format("%.2f", lb/10000.0);
-//
-//		paint.setColor(Color.YELLOW);
-//		paint.setTextAlign(Paint.Align.RIGHT);
-//		canvas.drawText(str, x, y, paint);
-//	}
-//
-//	//在指定位置，以白色、右对齐方式、指定宽度，显示市盈率
-//	public	static void	DrawSYL(Canvas canvas, int x, int y, int lb, int width, Paint paint)
-//	{
-//		String str = String.format("%.2f", lb/10000.0);
-//
-//		paint.setColor(Color.WHITE);
-//		paint.setTextAlign(Paint.Align.RIGHT);
-//		canvas.drawText(str, x, y, paint);
-//	}
-
-    public static void DrawAmount(Canvas canvas, int x, int top, int bottom, long amount, int market, Paint paint) {
-        String str = getStringByVolume(amount, market, 100, 6, false);
-        if (paint.getTextAlign() == Paint.Align.LEFT) {
-            DrawText(canvas, str,x, 0, top, bottom, paint);
-        } else {
-            paint.setTextAlign(Paint.Align.RIGHT);
-            if (amount == 0) {
-                paint.setColor(COLOR.DATA_NULL);
-            } else {
-                paint.setColor(COLOR.COLOR_VOL);
-            }
-            DrawText(canvas, str, 0, x, top, bottom, paint);
-        }
-    }
-
-    //在指定位置，显示涨跌幅
-    //flag:是否显示百分号
-    //isSign:是否显示符号，只有负数才显示符号
-    public static void DrawZDF(Canvas canvas, int x, int y, int zd, int now, int yesterday, boolean flag, boolean isSign, Paint paint, boolean pFlag) {
-        String str = getZDF(zd, yesterday, now, flag, isSign);
-        if (pFlag == false) {
-            paint.setColor(getColor(zd));
-            paint.setTextAlign(Paint.Align.RIGHT);
-        }
-        DrawText(canvas, str, 0, x, y, 0, paint);
-    }
-
-    //在指定位置，显示数值
-    public static void DrawInt(Canvas canvas, int x, int y, int data, int width, int color, Paint paint) {
-        paint.setColor(color);
-        paint.setTextAlign(Paint.Align.RIGHT);
-
-        StringBuffer str = new StringBuffer();
-        str.append(data);
-
-        canvas.drawText(str.toString(), x, y, paint);
-    }
 
     //根据小数点位数、放大倍数返回数值的字符串
     //flag: data为0时是否显示
@@ -747,13 +539,13 @@ public final class ViewTools {
     }
 
     public static int getColor(long data, long base) {
-        int color = COLOR.PRICE_EQUAL;
+        int color = Color.PRICE_UP;
         if (data == 0 && base != 0) {
-            color = COLOR.DATA_NULL;
+            color = Color.PRICE_UP;
         } else if (data > base) {
-            color = COLOR.PRICE_UP;
+            color = Color.PRICE_UP;
         } else if (data < base) {
-            color = COLOR.PRICE_DOWN;
+            color = Color.PRICE_DOWN;
         } else {
 //			L.e("ViewTools", "data = " + data + ", base = " + base);
         }
@@ -765,74 +557,44 @@ public final class ViewTools {
     }
 
     public static int getColor(int data, int base) {
-        int color = COLOR.PRICE_EQUAL;
+        int color = Color.PRICE_UP;
         if (data == 0 && base != 0) {
-            color = COLOR.DATA_NULL;
+            color = Color.PRICE_UP;
         } else if (data > base) {
-            color = COLOR.PRICE_UP;
+            color = Color.PRICE_UP;
         } else if (data < base) {
-            color = COLOR.PRICE_DOWN;
+            color = Color.PRICE_DOWN;
         } else {
 //			L.e("ViewTools", "data = " + data + ", base = " + base);
         }
         return color;
     }
 
-    public static int getTradeColor(int data, int base) {
-        int color = Color.rgb(0x00, 0x49, 0xA4);
-        if (data == 0 && base != 0) {
-            color = Color.rgb(0x00, 0x49, 0xA4);
-        } else if (data > base) {
-            color = COLOR.PRICE_UP;
-        } else if (data < base) {
-            color = COLOR.PRICE_DOWN;
-        }
-        return color;
-    }
 
-    public static int getTradeColor(String strdata, String strbase) {
-        int color = Color.rgb(0x00, 0x49, 0xA4);
-        if (strdata == null || strdata.length() <= 0 || strbase == null || strbase.length() <= 0)
-            return color;
 
-        try {
-            double data = Double.valueOf(strdata);
-            double base = Double.valueOf(strbase);
-            if (data == 0.0 && base != 0.0) {
-                color = Color.rgb(0x00, 0x49, 0xA4);
-            } else if (data > base) {
-                color = COLOR.PRICE_UP;
-            } else if (data < base) {
-                color = COLOR.PRICE_DOWN;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            color = Color.rgb(0x00, 0x49, 0xA4);
-        }
-        return color;
-    }
+
 
     //买卖气颜色
     public static int getMMQColor(double mmq) {
         int color = Color.WHITE;
         if (mmq == 0)                        //0
-            color = Color.rgb(50, 50, 50);    //0x323232
+            color = 0x323232;
         else if (mmq > 0 && mmq <= 20)        //(0, 20)
-            color = Color.rgb(90, 0, 0);    //0x5A0000
+            color = 0x5A0000;
         else if (mmq > 20 && mmq <= 40)        //(20, 40)
-            color = Color.rgb(180, 0, 0);    //0xB40000
+            color = 0xB40000;
         else if (mmq > 40 && mmq <= 70)        //(40, 70)
-            color = Color.rgb(255, 0, 0);    //0xFF0000
+            color = 0xFF0000;
         else if (mmq > 70 && mmq <= 100)        //(70, 100)
-            color = Color.rgb(255, 0, 255);    //0xFF00FF
+            color = 0xFF00FF;
         else if (mmq >= -20 && mmq < 0)        //(0, -20)
-            color = Color.rgb(0, 90, 0);    //0x005A00
+            color = 0x005A00;
         else if (mmq >= -40 && mmq < -20)    //(-20, -40)
-            color = Color.rgb(0, 180, 0);    //0x00B400
+            color = 0x00B400;
         else if (mmq >= -70 && mmq < -40)    //(-40, -70)
-            color = Color.rgb(0, 255, 0);    //0x00FF00
+            color = 0x00FF00;
         else if (mmq >= -100 && mmq < -70)    //(-70, -100)
-            color = Color.rgb(0, 255, 255);    //0x00FFFF
+            color = 0x00FFFF;
 
         return color;
     }
