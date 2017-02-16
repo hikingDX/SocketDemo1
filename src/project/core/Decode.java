@@ -106,10 +106,10 @@ public class Decode {
         /**
          * 5.解析协议
          */
-        return decodeDataByProtocol(head,expanddata,datasize,packagesize);
+        return decodeDataByProtocol(head, expanddata, datasize, packagesize);
     }
 
-    private int decodeDataByProtocol(MC_FrameHead head, byte[] expanddata, int datasize,int packagesize) {
+    private int decodeDataByProtocol(MC_FrameHead head, byte[] expanddata, int datasize, int packagesize) {
         mMsgObject = "";
         mArg2 = 0;
 
@@ -164,7 +164,10 @@ public class Decode {
                         ArrayList<tagLocalStockData> mStockDataList = new ArrayList<>();    //存储股票列表
                         MHC_SORT_RESPONE respone = CMobileProt.Analy_17(expanddata, datasize, mStockDataList);
 
-                        System.out.println("Test——总数："+respone.nTotalNum+"-------hiking-------"+mStockDataList.get(1).name);
+                        System.out.println("Test——总数：" + respone.nTotalNum + "-------hiking-------" );
+                        for (tagLocalStockData data : mStockDataList) {
+                            printstock(data);
+                        }
                         //通过PageId区分是否为自营版请求数据
                         if (head.PageID == Global_Define.FUNC_ZY_STOCK_SORT) {
                             isUpdate = false;
@@ -179,6 +182,9 @@ public class Decode {
 
         expanddata = null;
         return packagesize + MC_FrameHead_LEN;
+    }
+    private void printstock(tagLocalStockData data){
+        System.out.println("code:"+data.code+" | name:"+data.name+" | market:"+data.market+" | zdf:"+data.zdf);
     }
 
     /**

@@ -17,14 +17,12 @@ public class global_net_class {
 
     private NetSendThread mSendThread;
 
-    public Decode mDecode;
+    public Decode mDecode;//数据包解析类
 
     public global_net_class() {
         //数据包解析类
         mDecode = new Decode(this);
     }
-
-
     /**
      * 解析数据包
      *
@@ -35,7 +33,6 @@ public class global_net_class {
     public int decode(byte[] data, int size) {
         return mDecode.decode(data, size);
     }
-
     /**
      * 开启连接
      *

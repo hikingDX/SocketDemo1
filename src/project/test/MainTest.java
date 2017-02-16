@@ -13,7 +13,7 @@ public class MainTest {
         globalnetclass.mAddrConnectNum=1;
         int market = 3;
         int stocktype = 1;
-        int sorttype = 1;
+        int sorttype = 1;//涨跌幅排序
         int startpos = 0;
         int num = 20;
         globalnetclass.mRequestCode = 4;

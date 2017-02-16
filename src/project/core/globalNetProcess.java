@@ -5,6 +5,8 @@ import project.beans.MC_FrameHead;
 
 /**
  * 请求层
+ * 请求的套路:
+ * step1:初始化
  * Created by Administrator on 2017/2/15.
  */
 public class globalNetProcess {
@@ -45,7 +47,7 @@ public class globalNetProcess {
                 fix.length, fix, push.length, push, data, 0);
 
         /**
-         * data相当于应用数据类型即一个类 所以 在上面的请求操作中，data进行了赋值
+         *  data相当于引用数据类型即一个类 所以 在上面的请求操作中，data进行了赋值
          */
         netClass.addSendData(data, 0, size);
 
